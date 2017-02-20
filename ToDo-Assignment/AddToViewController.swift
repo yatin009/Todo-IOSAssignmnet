@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 protocol AddTaskDelegate {
     func addTodoTask(data: TodoModel)
@@ -43,11 +44,31 @@ class AddToViewController: UIViewController {
         if(notevalue==nil){
             return
         }
-        let newTask = TodoModel(nameValue!, switchValue, notevalue!)
-        delegate?.addTodoTask(data: newTask)
-        self.navigationController?.popViewController(animated: true)
+        let newTask = TodoModel()
+        newTask.name = nameValue!
+        newTask.isDone = switchValue
+        newTask.notes = notevalue!
+        
 
+        // Get the default Realm
+        let realm = try! Realm()
+
+        // Persist your data easily
+        try! realm.write {
+            //Adding Object Realm DB
+            realm.add(newTask)
+            //Calling delgate function in Tableview for updating List.
+            delegate?.addTodoTask(data: newTask)
+            //Pop up last activity
+            self.navigationController?.popViewController(animated: true)
+        }
+//        try! realm.write {
+//            realm.addObject(newTask)
+//            self.navigationController?.popViewController(animated: true)
+//        }
      }
+
+    
      /*
     // MARK: - Navigation
 

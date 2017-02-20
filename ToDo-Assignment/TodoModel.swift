@@ -6,22 +6,13 @@
 //  Copyright © 2017 MAPD-124. All rights reserved.
 //
 
-import UIKit
+import Foundation
+import RealmSwift
 
-class TodoModel{
+class TodoModel: Object {
     
-    var name: String = ""
-    var isDone = false
-    var notes : String = ""
-    
-    init(){
-        
-    }
-    
-    init(_ name: String,_ isDone: Bool,_ notes: String){
-        self.name = name
-        self.isDone = isDone
-        self.notes = notes
-    }
+    dynamic var name: String = ""
+    dynamic var isDone = false
+    dynamic var notes : String = ""
     
 }

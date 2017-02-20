@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import RealmSwift
 
 class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskDelegate {
 
-    var todoList : [TodoModel] = []
+    var todos : [TodoModel] = []
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         print("Click")
@@ -21,10 +22,10 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
         
         if let destinationViewController = segue.destination as? EditTodoViewController {
             let row = self.tableView.indexPathForSelectedRow!.row
-            let name = todoList[row].name;
+            let name = todos[row].name;
             print(row)
             print(name)
-            destinationViewController.todoTask = todoList[row]
+            destinationViewController.todoTask = todos[row]
             destinationViewController.taskPosition = row
             destinationViewController.delegate = self
         }
@@ -32,21 +33,15 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     
     
     func updateTodoTask(data: TodoModel, position: Int) {
-        // Uses the data passed back
-        print("Delegate EDIT")
-        print(data.name)
-        todoList[position] = data
+        initializeToDoList()
+        print("Delegate UPDATE")
         self.tableView.reloadData()
-        //        self.tableView.reloadRowsAtIndexPaths(position, withRowAnimation: UITableViewRowAnimation.None)
     }
     
     func addTodoTask(data: TodoModel) {
-        // Uses the data passed back
+        initializeToDoList()
         print("Delegate ADD")
-        print(data.name)
-        todoList.append(data)
         self.tableView.reloadData()
-        //        self.tableView.reloadRowsAtIndexPaths(position, withRowAnimation: UITableViewRowAnimation.None)
     }
 
     override func viewDidLoad() {
@@ -60,12 +55,9 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     }
     
     func initializeToDoList(){
-        let todo1 = TodoModel("Task 1", false, "Note 1")
-        let todo2 = TodoModel("Task 2", false, "Note 2")
-        let todo3 = TodoModel("Task 3", true, "Note 3")
-        todoList.append(todo1)
-        todoList.append(todo2)
-        todoList.append(todo3)
+        let realm = try! Realm()
+        todos =  Array(realm.objects(TodoModel.self))
+        print(todos.count)
     }
 
     override func didReceiveMemoryWarning() {
@@ -82,18 +74,29 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return todoList.count
+        return todos.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "todoCell", for: indexPath) as! ToDoTableViewCell
 
-        let todoTask = self.todoList[indexPath.row]
+        let todoTask = self.todos[indexPath.row]
+        print(todoTask.name)
+
         cell.todoName.text = todoTask.name
         cell.todoSwitch.setOn(todoTask.isDone, animated: true)
-
+        cell.todoSwitch.tag = indexPath.row
+        cell.todoSwitch.addTarget(self, action: #selector(ToDoTableViewController.switchChanged(_:)), for: UIControlEvents.valueChanged)
         return cell
+    }
+    
+    func switchChanged(_ mySwitch: UISwitch!) {
+        let value = mySwitch.isOn
+        print(value)
+        print(mySwitch.tag)
+        todos[mySwitch.tag].isDone = value
+        // Do something
     }
 
 
@@ -105,7 +108,7 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     }
     */
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
@@ -115,7 +118,6 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
     }
-    */
 
     /*
     // Override to support rearranging the table view.

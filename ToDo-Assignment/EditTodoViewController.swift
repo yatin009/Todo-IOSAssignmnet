@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 protocol EditTaskDelegate : class {
     func updateTodoTask(data: TodoModel, position: Int)
@@ -46,11 +47,19 @@ class EditTodoViewController: UIViewController {
         if(notevalue==nil){
             return
         }
-        todoTask.name = nameValue!
-        todoTask.isDone = switchValue
-        todoTask.notes = notevalue!
-        delegate?.updateTodoTask(data: todoTask, position: taskPosition)
-        self.navigationController?.popViewController(animated: true)
+        
+        // Get the default Realm
+        let realm = try! Realm()
+        
+        try! realm.write {
+            print("INSIDE REALM WRITE")
+            //Updating Realm object values
+            todoTask.name = nameValue!
+            todoTask.isDone = switchValue
+            todoTask.notes = notevalue!
+            delegate?.updateTodoTask(data: todoTask, position: taskPosition)
+            self.navigationController?.popViewController(animated: true)
+        }
     }
     
      /*
