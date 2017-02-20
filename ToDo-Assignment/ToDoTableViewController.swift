@@ -13,50 +13,35 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
 
     var todos : [TodoModel] = []
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("Click")
-        
-         if let destinationViewController = segue.destination as? AddToViewController {
-            destinationViewController.delegate = self
-        }
-        
-        if let destinationViewController = segue.destination as? EditTodoViewController {
-            let row = self.tableView.indexPathForSelectedRow!.row
-            let name = todos[row].name;
-            print(row)
-            print(name)
-            destinationViewController.todoTask = todos[row]
-            destinationViewController.taskPosition = row
-            destinationViewController.delegate = self
-        }
-    }
     
     
     func updateTodoTask(data: TodoModel, position: Int) {
-        initializeToDoList()
+        initializeToDoList(true)
         print("Delegate UPDATE")
-        self.tableView.reloadData()
     }
     
     func addTodoTask(data: TodoModel) {
-        initializeToDoList()
+        initializeToDoList(true)
         print("Delegate ADD")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        initializeToDoList(false)
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
-    
-    func initializeToDoList(){
+        
+    func initializeToDoList(_ isReload: Bool){
         let realm = try! Realm()
         todos =  Array(realm.objects(TodoModel.self))
         print(todos.count)
-        self.tableView.reloadData()
+        if(isReload){
+            self.tableView.reloadData()
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -76,6 +61,14 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
         return todos.count
     }
 
+    @IBAction func deleteAllAction(_ sender: UIBarButtonItem) {
+        let realm = try! Realm()
+        // Delete all objects from the realm
+        try! realm.write {
+            realm.deleteAll()
+        }
+        initializeToDoList(true)
+    }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "todoCell", for: indexPath) as! ToDoTableViewCell
@@ -94,7 +87,10 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
         let value = mySwitch.isOn
         print(value)
         print(mySwitch.tag)
-        todos[mySwitch.tag].isDone = value
+        let realm = try! Realm()
+        try! realm.write {
+            todos[mySwitch.tag].isDone = value
+        }
         // Do something
     }
 
@@ -117,9 +113,7 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
             try! realm.write {
                 realm.delete(todoTask)
             }
-            initializeToDoList()
-//            self.tableView.reloadData()
-//            tableView.deleteRows(at: [indexPath], with: .fade)
+            initializeToDoList(true)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
@@ -132,22 +126,32 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     }
     */
 
-    /*
+    
     // Override to support conditional rearranging of the table view.
     override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the item to be re-orderable.
         return true
     }
-    */
 
-    /*
-    // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        print("Click")
+        
+        if let destinationViewController = segue.destination as? AddToViewController {
+            destinationViewController.delegate = self
+        }
+        
+        if let destinationViewController = segue.destination as? EditTodoViewController {
+            let row = self.tableView.indexPathForSelectedRow!.row
+            let name = todos[row].name;
+            print(row)
+            print(name)
+            destinationViewController.todoTask = todos[row]
+            destinationViewController.taskPosition = row
+            destinationViewController.delegate = self
+        }
     }
-    */
+    
 
 }

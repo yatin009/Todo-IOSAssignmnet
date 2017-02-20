@@ -24,4 +24,14 @@ class ToDoTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
 
+    @IBAction func switchListner(_ sender: UISwitch) {
+        if(sender.isOn) {
+            todoName.textColor = UIColor.black
+            todoName.font = UIFont.boldSystemFont(ofSize: 20)
+        }
+        else {
+            todoName.textColor = UIColor.lightGray
+            todoName.font = UIFont.italicSystemFont(ofSize: 20)
+        }
+    }
 }
