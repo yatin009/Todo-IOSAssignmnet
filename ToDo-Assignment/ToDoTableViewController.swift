@@ -41,12 +41,10 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     func addTodoTask(data: TodoModel) {
         initializeToDoList()
         print("Delegate ADD")
-        self.tableView.reloadData()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializeToDoList()
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -58,6 +56,7 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
         let realm = try! Realm()
         todos =  Array(realm.objects(TodoModel.self))
         print(todos.count)
+        self.tableView.reloadData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -113,7 +112,14 @@ class ToDoTableViewController: UITableViewController, EditTaskDelegate, AddTaskD
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            let todoTask = self.todos[indexPath.row]
+            let realm = try! Realm()
+            try! realm.write {
+                realm.delete(todoTask)
+            }
+            initializeToDoList()
+//            self.tableView.reloadData()
+//            tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
